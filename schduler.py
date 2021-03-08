@@ -67,12 +67,6 @@ class WarmupCosineLR(_LRScheduler):
         """
         Compute learning rate using chainable form of the scheduler
         """
-        if not self._get_lr_called_within_step:
-            warnings.warn(
-                "To get the last learning rate computed by the scheduler, "
-                "please use `get_last_lr()`.",
-                UserWarning,
-            )
 
         if self.last_epoch == 0:
             return [self.warmup_start_lr] * len(self.base_lrs)
