@@ -36,7 +36,7 @@ def main(args):
             os.environ["MLFLOW_TRACKING_PASSWORD"]= mlsecrets['pwd']
 
             mlflow.set_tracking_uri(mlsecrets['server'])
-            mlflow.set_experiment('mnist_gau')
+            mlflow.set_experiment('cifar10_gau')
             
             mlflow.pytorch.autolog()
 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
 
     # PROGRAM level args
-    parser.add_argument("--data_dir", type=str, default="/data/cifar10")
+    parser.add_argument("--data_dir", type=str, default="data/cifar10/")
     parser.add_argument("--download_weights", type=int, default=0, choices=[0, 1])
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
