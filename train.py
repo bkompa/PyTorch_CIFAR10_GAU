@@ -73,12 +73,12 @@ if __name__ == "__main__":
     parser = ArgumentParser()
 
     # PROGRAM level args
-    parser.add_argument("--data_dir", type=str, default="/data/huy/cifar10")
+    parser.add_argument("--data_dir", type=str, default="/data/cifar10")
     parser.add_argument("--download_weights", type=int, default=0, choices=[0, 1])
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
     parser.add_argument(
-        "--logger", type=str, default="tensorboard", choices=["tensorboard", "wandb, mlflow"]
+        "--logger", type=str, default="tensorboard", choices=["tensorboard", "wandb", "mlflow"]
     )
 
     # TRAINER args
