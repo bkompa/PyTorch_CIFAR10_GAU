@@ -9,6 +9,7 @@ from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 from data import CIFAR10Data
 from module import CIFAR10Module
 
+import json
 import mlflow 
 import mlflow.pytorch 
 
