@@ -44,7 +44,6 @@ def main(args):
 
         trainer = Trainer(
             fast_dev_run=bool(args.dev),
-            logger=logger if not bool(args.dev + args.test_phase) else None,
             gpus=-1,
             deterministic=True,
             weights_summary=None,
