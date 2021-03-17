@@ -9,6 +9,9 @@ from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 from data import CIFAR10Data
 from module import CIFAR10Module
 
+import mlflow 
+import mlflow.pytorch 
+
 
 def main(args):
 
@@ -22,6 +25,19 @@ def main(args):
             logger = WandbLogger(name=args.classifier, project="cifar10")
         elif args.logger == "tensorboard":
             logger = TensorBoardLogger("cifar10", name=args.classifier)
+        elif args.logger == 'mlflow':
+            with open(os.path.join(os.path.expanduser("~"), "mlsecrets.json"), "r") as file:
+                mlsecrets = json.load(file)
+
+            os.environ["AWS_ACCESS_KEY_ID"] = mlsecrets['s3_user']
+            os.environ["AWS_SECRET_ACCESS_KEY"]= mlsecrets['s3_key']
+            os.environ["MLFLOW_TRACKING_USERNAME"] = mlsecrets['user']
+            os.environ["MLFLOW_TRACKING_PASSWORD"]= mlsecrets['pwd']
+
+            mlflow.set_tracking_uri(mlsecrets['server'])
+            mlflow.set_experiment('mnist_gau')
+            
+            mlflow.pytorch.autolog()
 
         checkpoint = ModelCheckpoint(monitor="acc/val", mode="max", save_last=False)
 
@@ -62,7 +78,7 @@ if __name__ == "__main__":
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
     parser.add_argument(
-        "--logger", type=str, default="tensorboard", choices=["tensorboard", "wandb"]
+        "--logger", type=str, default="tensorboard", choices=["tensorboard", "wandb, mlflow"]
     )
 
     # TRAINER args
@@ -73,7 +89,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=256)
     parser.add_argument("--max_epochs", type=int, default=100)
     parser.add_argument("--num_workers", type=int, default=8)
-    parser.add_argument("--gpu_id", type=str, default="3")
+    parser.add_argument("--gpu_id", type=str, default="0")
 
     parser.add_argument("--learning_rate", type=float, default=1e-2)
     parser.add_argument("--weight_decay", type=float, default=1e-2)
