@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import os
 
+from RBF_activation import *
+
 __all__ = [
     "ResNet",
     "resnet18",
@@ -42,6 +44,7 @@ class BasicBlock(nn.Module):
         base_width=64,
         dilation=1,
         norm_layer=None,
+        RBF=False
     ):
         super(BasicBlock, self).__init__()
         if norm_layer is None:
@@ -58,6 +61,9 @@ class BasicBlock(nn.Module):
         self.bn2 = norm_layer(planes)
         self.downsample = downsample
         self.stride = stride
+        if RBF: 
+            square_dim = 1024 // planes
+            self.RBF_activation = RBF_activation((square_dim, square_dim))
 
     def forward(self, x):
         identity = x
@@ -73,7 +79,10 @@ class BasicBlock(nn.Module):
             identity = self.downsample(x)
 
         out += identity
-        out = self.relu(out)
+        if RBF:
+            out = self.RBF_activation(out)
+        else:
+            out = self.relu(out)
 
         return out
 
@@ -90,7 +99,7 @@ class Bottleneck(nn.Module):
         groups=1,
         base_width=64,
         dilation=1,
-        norm_layer=None,
+        norm_layer=None
     ):
         super(Bottleneck, self).__init__()
         if norm_layer is None:
@@ -141,12 +150,14 @@ class ResNet(nn.Module):
         width_per_group=64,
         replace_stride_with_dilation=None,
         norm_layer=None,
+        RBF = False
     ):
         super(ResNet, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
 
+        self.RBF = RBF
         self.inplanes = 64
         self.dilation = 1
         if replace_stride_with_dilation is None:
@@ -178,7 +189,7 @@ class ResNet(nn.Module):
             block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1]
         )
         self.layer4 = self._make_layer(
-            block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2]
+            block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2], self.RBF
         )
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
@@ -200,7 +211,7 @@ class ResNet(nn.Module):
                 elif isinstance(m, BasicBlock):
                     nn.init.constant_(m.bn2.weight, 0)
 
-    def _make_layer(self, block, planes, blocks, stride=1, dilate=False):
+    def _make_layer(self, block, planes, blocks, stride=1, dilate=False, RBF=False):
         norm_layer = self._norm_layer
         downsample = None
         previous_dilation = self.dilation
@@ -223,7 +234,7 @@ class ResNet(nn.Module):
                 self.groups,
                 self.base_width,
                 previous_dilation,
-                norm_layer,
+                norm_layer
             )
         )
         self.inplanes = planes * block.expansion
@@ -236,6 +247,7 @@ class ResNet(nn.Module):
                     base_width=self.base_width,
                     dilation=self.dilation,
                     norm_layer=norm_layer,
+                    RBF=RBF
                 )
             )
 

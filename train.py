@@ -93,6 +93,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--learning_rate", type=float, default=1e-2)
     parser.add_argument("--weight_decay", type=float, default=1e-2)
+    parser.add_argument("--RBF", action="store_true")
 
     args = parser.parse_args()
     main(args)
