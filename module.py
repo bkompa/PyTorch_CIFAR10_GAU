@@ -7,6 +7,7 @@ from cifar10_models.googlenet import googlenet
 from cifar10_models.inception import inception_v3
 from cifar10_models.mobilenetv2 import mobilenet_v2
 from cifar10_models.resnet import resnet18, resnet34, resnet50
+from cifar10_models.resnetrbf import resnet18_RBF, resnet34_RBF, resnet50_RBF
 from cifar10_models.vgg import vgg11_bn, vgg13_bn, vgg16_bn, vgg19_bn
 from schduler import WarmupCosineLR
 
@@ -18,6 +19,9 @@ all_classifiers = {
     "resnet18": resnet18(),
     "resnet34": resnet34(),
     "resnet50": resnet50(),
+    "resnet18_RBF": resnet18_RBF(),
+    "resnet34_RBF": resnet34_RBF(),
+    "resnet50_RBF": resnet50_RBF(),
     "densenet121": densenet121(),
     "densenet161": densenet161(),
     "densenet169": densenet169(),
