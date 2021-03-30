@@ -4,7 +4,7 @@ wandb/
 checkpoints/
 *.pt
 *.zip
-
+.idea/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
