@@ -70,29 +70,29 @@ def main(args):
 
 
 if __name__ == "__main__":
-parser = ArgumentParser()
+    parser = ArgumentParser()
 
-# PROGRAM level args
-parser.add_argument("--data_dir", type=str, default="data/cifar10/")
-parser.add_argument("--download_weights", type=int, default=0, choices=[0, 1])
-parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
-parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
-parser.add_argument(
-    "--logger", type=str, default="tensorboard", choices=["tensorboard", "wandb", "mlflow"]
-)
+    # PROGRAM level args
+    parser.add_argument("--data_dir", type=str, default="data/cifar10/")
+    parser.add_argument("--download_weights", type=int, default=0, choices=[0, 1])
+    parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
+    parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
+    parser.add_argument(
+        "--logger", type=str, default="tensorboard", choices=["tensorboard", "wandb", "mlflow"]
+    )
 
-# TRAINER args
-parser.add_argument("--classifier", type=str, default="resnet18_RBF")
-parser.add_argument("--pretrained", type=int, default=0, choices=[0, 1])
+    # TRAINER args
+    parser.add_argument("--classifier", type=str, default="resnet18_RBF")
+    parser.add_argument("--pretrained", type=int, default=0, choices=[0, 1])
 
-parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
-parser.add_argument("--batch_size", type=int, default=256)
-parser.add_argument("--max_epochs", type=int, default=100)
-parser.add_argument("--num_workers", type=int, default=8)
-parser.add_argument("--gpu_id", type=str, default="0")
+    parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
+    parser.add_argument("--batch_size", type=int, default=256)
+    parser.add_argument("--max_epochs", type=int, default=100)
+    parser.add_argument("--num_workers", type=int, default=8)
+    parser.add_argument("--gpu_id", type=str, default="0")
 
-parser.add_argument("--learning_rate", type=float, default=1e-2)
-parser.add_argument("--weight_decay", type=float, default=1e-2)
+    parser.add_argument("--learning_rate", type=float, default=1e-2)
+    parser.add_argument("--weight_decay", type=float, default=1e-2)
 
-args = parser.parse_args()
+    args = parser.parse_args()
     main(args)
