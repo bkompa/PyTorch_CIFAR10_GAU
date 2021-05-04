@@ -9,7 +9,7 @@ corruptions = ['brightness', 'contrast', 'defocus_blur', 'elastic',
               'frosted_glass_blur', 'impulse_noise', 'pixelate', 'saturate', 'shot_noise', 
               'spatter', 'speckle_noise', 'zoom_blur', ]
 
-data_dir = "data/cifar10_c"
+data_dir = "data/cifar10c"
 
 mean = (0.4914, 0.4822, 0.4465)
 std = (0.2471, 0.2435, 0.2616)
@@ -17,6 +17,7 @@ transform = T.Compose([T.ToTensor(), T.Normalize(mean, std)])
 
 for corruption in corruptions:
 	for idx in range(1,6):
+		print(f"Downloading {corruption}_{idx}...")
 		ds, _ = tfds.load(f"cifar10_corrupted/{corruption}_{idx}", with_info=True, shuffle_files=False, data_dir=data_dir)
 		np_imgs = np.stack([data['image']/255. for data in iter(tfds.as_numpy(ds)['test'])], axis=0)
 		np_labels = np.stack([data['label'] for data in iter(tfds.as_numpy(ds)['test'])])
