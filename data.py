@@ -1,13 +1,37 @@
 import os
 import zipfile
-
+import torch
 import pytorch_lightning as pl
 import requests
 from torch.utils.data import DataLoader
 from torchvision import transforms as T
+import torchvision.transforms.functional as TF
+from torchvision import datasets, transforms
 from torchvision.datasets import CIFAR10
 from tqdm import tqdm
 
+import matplotlib.pyplot as plt
+import numpy as np 
+
+
+def plot_example(dataset, idx):
+    plt.imshow(np.transpose(dataset[idx].numpy(),(1,2,0)).squeeze())
+    plt.show()
+
+class RotationTransform:
+    def __init__(self, angle):
+        self.angle = angle
+
+    def __call__(self, x): 
+        return TF.rotate(x, self.angle)
+
+class RollTransform:
+    def __init__(self, pixels, axis):
+        self.pixels = pixels
+        self.axis = axis
+
+    def __call__(self, x): 
+        return torch.roll(x, self.pixels, dims=self.axis)
 
 class CIFAR10Data(pl.LightningDataModule):
     def __init__(self, args):
@@ -84,3 +108,19 @@ class CIFAR10Data(pl.LightningDataModule):
 
     def test_dataloader(self):
         return self.val_dataloader()
+
+    def get_rotation_data(self, rotation_angle=0):
+        transform = T.Compose([RotationTransform(rotation_angle), T.ToTensor(), T.Normalize(self.mean, self.std)])
+        cifar10_data = CIFAR10(root=self.hparams.data_dir, train=False, download=True, transform=None)
+        transform_data = torch.stack([transform(img) for img, label in cifar10_data])
+        labels = torch.Tensor([label for img, label in cifar10_data])
+
+        return transform_data, labels
+
+    def get_roll_data(self, roll_pixels=0, axis=2):
+        transform = T.Compose([T.ToTensor(), RollTransform(roll_pixels, axis), T.Normalize(self.mean, self.std)])
+        cifar10_data = CIFAR10(root=self.hparams.data_dir, train=False, download=True, transform=None)
+        transform_data = torch.stack([transform(img) for img, label in cifar10_data])
+        labels = torch.Tensor([label for img, label in cifar10_data])
+
+        return transform_data, labels
