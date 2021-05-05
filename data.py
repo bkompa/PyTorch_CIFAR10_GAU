@@ -3,12 +3,14 @@ import zipfile
 import torch
 import pytorch_lightning as pl
 import requests
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 from torchvision import transforms as T
 import torchvision.transforms.functional as TF
 from torchvision import datasets, transforms
 from torchvision.datasets import CIFAR10
 from tqdm import tqdm
+
+from itertools import filterfalse
 
 import matplotlib.pyplot as plt
 import numpy as np 
@@ -39,6 +41,7 @@ class CIFAR10Data(pl.LightningDataModule):
         self.hparams = args
         self.mean = (0.4914, 0.4822, 0.4465)
         self.std = (0.2471, 0.2435, 0.2616)
+        self.train_dataset = None
 
     def download_weights():
         url = (
@@ -79,8 +82,15 @@ class CIFAR10Data(pl.LightningDataModule):
             ]
         )
         dataset = CIFAR10(root=self.hparams.data_dir, train=True, transform=transform, download=True)
+
+        if self.train_dataset is None:
+            self.train_dataset = dataset
+        val_split = self.hparams.val_split
+        split_indices = list(filterfalse(lambda x: 10000*val_split <= x < 10000*(val_split+1), range(50000)))
+
+        train_data_split = Subset(dataset, split_indices)
         dataloader = DataLoader(
-            dataset,
+            train_data_split,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
             shuffle=True,
@@ -90,6 +100,24 @@ class CIFAR10Data(pl.LightningDataModule):
         return dataloader
 
     def val_dataloader(self):
+        # make sure self.train_dataset is not None
+        self.train_dataloader()
+
+        val_split = self.hparams.val_split
+        split_indices = range(10000*val_split, 10000*(val_split+1))
+
+        val_data_split = Subset(self.train_dataset, split_indices)
+        dataloader = DataLoader(
+            val_data_split,
+            batch_size=self.hparams.batch_size,
+            num_workers=self.hparams.num_workers,
+            shuffle=True,
+            drop_last=True,
+            pin_memory=True,
+        )
+        return dataloader
+
+    def test_dataloader(self):
         transform = T.Compose(
             [
                 T.ToTensor(),
@@ -105,9 +133,6 @@ class CIFAR10Data(pl.LightningDataModule):
             pin_memory=True,
         )
         return dataloader
-
-    def test_dataloader(self):
-        return self.val_dataloader()
 
     def get_rotation_data(self, rotation_angle=0):
         transform = T.Compose([RotationTransform(rotation_angle), T.ToTensor(), T.Normalize(self.mean, self.std)])
