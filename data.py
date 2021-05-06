@@ -145,7 +145,7 @@ class CIFAR10Data(pl.LightningDataModule):
         if self.cifar10_data_test is None: 
             self.cifar10_data_test = CIFAR10(root=self.hparams.data_dir, train=False, download=True, transform=None)
         transform_data = torch.stack([transform(img) for img, label in self.cifar10_data_test])
-        labels = torch.Tensor([label for img, label in cifar10_data])
+        labels = torch.Tensor([label for img, label in self.cifar10_data_test])
 
         return transform_data, labels
 
@@ -154,6 +154,6 @@ class CIFAR10Data(pl.LightningDataModule):
         if self.cifar10_data_test is None: 
             self.cifar10_data_test = CIFAR10(root=self.hparams.data_dir, train=False, download=True, transform=None)
         transform_data = torch.stack([transform(img) for img, label in self.cifar10_data_test])
-        labels = torch.Tensor([label for img, label in cifar10_data])
+        labels = torch.Tensor([label for img, label in self.cifar10_data_test])
 
         return transform_data, labels

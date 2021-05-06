@@ -89,14 +89,15 @@ def eval_on_dataset_shift(dict_args):
 	model_name = dict_args['model_name']
 	shift = dict_args['split']
 	act = 'pre_activation' if dict_args['pre_activation'] else 'post_activation'
-
+	os.makedirs(f"{model_dir}/{pre}", exist_ok=True)
+	
 	if dict_args['split'] == 'val':
 		print('Predicting on validation data...')
 		data, labels = data_module.get_validation_data()
 		with torch.no_grad():
 			base_model(data)
 		model_outputs = pre_activations[rbf_name] if dict_args['pre_activation'] else activations[rbf_name]
-		os.makedirs(f"{model_dir}/{pre}", exist_ok=True)
+		
 		np.save(f"{model_dir}/{pre}/{pre}_{shift}_layer_{dict_args['layer']}_{act}_ouputs.npy", model_outputs)
 		return
 
