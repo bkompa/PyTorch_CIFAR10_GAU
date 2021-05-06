@@ -136,7 +136,7 @@ class CIFAR10Data(pl.LightningDataModule):
     def get_validation_data(self):
         val_dataloader = self.val_dataloader()
         imgs = torch.stack([img for img, _ in val_dataloader.dataset])
-        labels = torch.stack([label for _, label in val_dataloader.dataset])
+        labels = torch.Tensor([label for _, label in val_dataloader.dataset])
         return imgs, labels
 
     def get_rotation_data(self, rotation_angle=0):
