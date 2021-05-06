@@ -87,7 +87,7 @@ def eval_on_dataset_shift(dict_args):
 	pre, ext = os.path.splitext(dict_args['model_name'])
 	model_dir = dict_args['model_dir']
 	model_name = dict_args['model_name']
-	shift = dict_args['shift']
+	shift = dict_args['split']
 	act = 'pre_activation' if dict_args['pre_activation'] else 'post_activation'
 
 	if dict_args['split'] == 'val':
