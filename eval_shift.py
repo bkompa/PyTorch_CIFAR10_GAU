@@ -8,6 +8,8 @@ from pytorch_lightning.metrics.functional import accuracy
 
 import pickle
 from argparse import Namespace
+import os
+import torch
 
 def model_accuracy(model, data, labels):
 	with torch.no_grad():
@@ -49,7 +51,7 @@ def eval_on_dataset_shift(dict_args):
 
 	model_acc_list = []
 	output_list = []
-	if dict_args['shift'] == "roll":
+	if dict_args['split'] == "roll":
 
 		for roll in np.arange(0,30,2):
 			print(f"Processing roll {roll}...")
@@ -63,7 +65,7 @@ def eval_on_dataset_shift(dict_args):
 			model_outputs = pre_activations[rbf_name] if dict_args['pre_activation'] else activations[rbf_name]
 			output_list.append(dict(roll_pix=roll, output=model_outputs))
 
-	if dict_args['rot']:
+	if dict_args['split'] == 'rot':
 
 		for rot in np.arange(0,360,15):
 			print(f"Processing rot {rot}...")
@@ -77,19 +79,25 @@ def eval_on_dataset_shift(dict_args):
 			model_outputs = pre_activations[rbf_name] if dict_args['pre_activation'] else activations[rbf_name]
 			output_list.append(dict(roll_pix=roll, output=model_outputs))
 
+
 	# model_name.pth
 	pre, ext = os.path.splitext(dict_args['model_name'])
 	model_dir = dict_args['model_dir']
 	model_name = dict_args['model_name']
 	shift = dict_args['shift']
 	act = 'pre_activation' if dict_args['pre_activation'] else 'post_activation'
-	print(model_acc_list)
+
+	if dict_args['split'] == 'val':
+		data, labels = data_module.get_validation_data()
+		with torch.no_grad():
+			base_model(data)
+		model_outputs = pre_activations[rbf_name] if dict_args['pre_activation'] else activations[rbf_name]
+		np.save(f"{model_dir}/{model_name}/{pre}_{shift}_layer_{dict_args['layer']}_{act}_ouputs.npy", model_outputs)
+
 	with open(f"{model_dir}/{model_name}/{pre}_{shift}_acc.pkl", 'wb') as pickle_file:
 		pickle.dump(model_acc_list, pickle_file)
 	with open(f"{model_dir}/{model_name}/{pre}_{shift}_layer_{dict_args['layer']}_{act}_ouputs.pkl", 'wb') as pickle_file:
 		pickle.dump(output_list, pickle_file)
-
-
 
 
 
@@ -100,7 +108,7 @@ def main():
 	parser.add_argument("--model_dir", default='/mnt/medqaresourcegroupdiag/medqa-fileshare/users/bk117/models')
 	parser.add_argument("--model_name", required=True)
 	parser.add_argument("--classifier", type=str, default="resnet18_RBF")
-	parser.add_argument("--shift", type=str, choices=['roll', 'rot', 'cifar10_c'])
+	parser.add_argument("--split", type=str, choices=['roll', 'rot', 'cifar10_c', 'val'])
 	parser.add_argument("--layer", type=int, default=4)
 	parser.add_argument("--pre_activation", action="store_true")
 
