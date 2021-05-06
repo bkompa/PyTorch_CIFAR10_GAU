@@ -111,7 +111,6 @@ class CIFAR10Data(pl.LightningDataModule):
             val_data_split,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
-            shuffle=True,
             drop_last=True,
             pin_memory=True,
         )

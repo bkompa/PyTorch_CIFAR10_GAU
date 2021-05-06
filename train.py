@@ -43,7 +43,7 @@ def main(args):
         checkpoint = ModelCheckpoint(monitor="acc/val", mode="max", save_last=False)
 
         trainer = Trainer(
-            fast_dev_run=bool(args.dev),
+            fast_dev_run=False,
             gpus=-1,
             deterministic=True,
             weights_summary=None,

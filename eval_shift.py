@@ -10,20 +10,18 @@ import pickle
 from argparse import Namespace
 
 def model_accuracy(model, data, labels):
-	output = model(data)
+	with torch.no_grad():
+		output = model(data)
 	_, y_hat = torch.max(output, dim=1)
 	test_acc = accuracy(y_hat.cpu(), labels.cpu())
 	return test_acc
-
-
 
 def eval_on_dataset_shift(dict_args):
 
 	# load model state_dic
 	args = Namespace(**dict_args)
-	base_model = CIFAR10Module(args).model
-	base_model.load_state_dict(torch.load(dict_args['model_path']))
-	base_model = base_model.eval()
+	base_model = torch.load(dict_args['model_path']).model
+	base_model = base_model.cpu().eval()
 
 	data_module = CIFAR10Data(args)
 
@@ -36,7 +34,7 @@ def eval_on_dataset_shift(dict_args):
 	activations = {}
 	def get_activation(layer_name):
 		def hook(model, input, output):
-			activation[layer_name] = output.detach()
+			activations[layer_name] = output.detach()
 		return hook
 
 	#register hooks to look at activations
@@ -45,9 +43,9 @@ def eval_on_dataset_shift(dict_args):
 	rbf_name = f"{max_layer_block}.RBF_activation"
 
 	if dict_args['pre_activation']:
-		base_model.register_forward_pre_hook(get_pre_activation(rbf_name))
+		layer.register_forward_pre_hook(get_pre_activation(rbf_name))
 	else:
-		base_model.register_forward_hook(get_activation(rbf_name))
+		layer.register_forward_hook(get_activation(rbf_name))
 
 	model_acc_list = []
 	output_list = []
@@ -60,7 +58,8 @@ def eval_on_dataset_shift(dict_args):
 			roll_acc = model_accuracy(base_model, data, labels)
 			model_acc_list.append(roll_acc)
 
-			base_model(data)
+			with torch.no_grad():
+				base_model(data)
 			model_outputs = pre_activations[rbf_name] if dict_args['pre_activation'] else activations[rbf_name]
 			output_list.append(dict(roll_pix=roll, output=model_outputs))
 
@@ -72,20 +71,22 @@ def eval_on_dataset_shift(dict_args):
 
 			rot_acc = model_accuracy(base_model, data, labels)
 			model_acc_list.append(rot_acc)
-		
-			base_model(data)
+			
+			with torch.no_grad():
+				base_model(data)
 			model_outputs = pre_activations[rbf_name] if dict_args['pre_activation'] else activations[rbf_name]
 			output_list.append(dict(roll_pix=roll, output=model_outputs))
 
 	# model_name.pth
 	pre, ext = os.path.splitext(dict_args['model_name'])
 	model_dir = dict_args['model_dir']
+	model_name = dict_args['model_name']
 	shift = dict_args['shift']
 	act = 'pre_activation' if dict_args['pre_activation'] else 'post_activation'
 	print(model_acc_list)
-	with open(f"{model_dir}/{pre}_{shift}_acc.pkl", 'wb') as pickle_file:
+	with open(f"{model_dir}/{model_name}/{pre}_{shift}_acc.pkl", 'wb') as pickle_file:
 		pickle.dump(model_acc_list, pickle_file)
-	with open(f"{model_dir}/{pre}_{shift}_layer_{dict_args['layer']}_{act}_ouputs.pkl", 'wb') as pickle_file:
+	with open(f"{model_dir}/{model_name}/{pre}_{shift}_layer_{dict_args['layer']}_{act}_ouputs.pkl", 'wb') as pickle_file:
 		pickle.dump(output_list, pickle_file)
 
 
@@ -100,7 +101,7 @@ def main():
 	parser.add_argument("--model_name", required=True)
 	parser.add_argument("--classifier", type=str, default="resnet18_RBF")
 	parser.add_argument("--shift", type=str, choices=['roll', 'rot', 'cifar10_c'])
-	parser.add_argument("--layer", type=int)
+	parser.add_argument("--layer", type=int, default=4)
 	parser.add_argument("--pre_activation", action="store_true")
 
 	parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
