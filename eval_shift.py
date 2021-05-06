@@ -10,6 +10,7 @@ import pickle
 from argparse import Namespace
 import os
 import torch
+import argparse
 
 def model_accuracy(model, data, labels):
 	with torch.no_grad():
@@ -22,6 +23,7 @@ def eval_on_dataset_shift(dict_args):
 
 	# load model state_dic
 	args = Namespace(**dict_args)
+	print('Loading model...')
 	base_model = torch.load(dict_args['model_path']).model
 	base_model = base_model.cpu().eval()
 
@@ -44,6 +46,7 @@ def eval_on_dataset_shift(dict_args):
 	max_layer_block = len(list(layer.children()))-1
 	rbf_name = f"{max_layer_block}.RBF_activation"
 
+	print('Registering hooks...')
 	if dict_args['pre_activation']:
 		layer.register_forward_pre_hook(get_pre_activation(rbf_name))
 	else:
@@ -88,6 +91,7 @@ def eval_on_dataset_shift(dict_args):
 	act = 'pre_activation' if dict_args['pre_activation'] else 'post_activation'
 
 	if dict_args['split'] == 'val':
+		print('Predicting on validation data...')
 		data, labels = data_module.get_validation_data()
 		with torch.no_grad():
 			base_model(data)
