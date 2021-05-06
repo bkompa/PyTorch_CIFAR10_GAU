@@ -42,6 +42,7 @@ class CIFAR10Data(pl.LightningDataModule):
         self.mean = (0.4914, 0.4822, 0.4465)
         self.std = (0.2471, 0.2435, 0.2616)
         self.train_dataset = None
+        self.cifar10_data_test = None
 
     def download_weights():
         url = (
@@ -141,16 +142,18 @@ class CIFAR10Data(pl.LightningDataModule):
 
     def get_rotation_data(self, rotation_angle=0):
         transform = T.Compose([RotationTransform(rotation_angle), T.ToTensor(), T.Normalize(self.mean, self.std)])
-        cifar10_data = CIFAR10(root=self.hparams.data_dir, train=False, download=True, transform=None)
-        transform_data = torch.stack([transform(img) for img, label in cifar10_data])
+        if self.cifar10_data_test is None: 
+            self.cifar10_data_test = CIFAR10(root=self.hparams.data_dir, train=False, download=True, transform=None)
+        transform_data = torch.stack([transform(img) for img, label in self.cifar10_data_test])
         labels = torch.Tensor([label for img, label in cifar10_data])
 
         return transform_data, labels
 
     def get_roll_data(self, roll_pixels=0, axis=2):
         transform = T.Compose([T.ToTensor(), RollTransform(roll_pixels, axis), T.Normalize(self.mean, self.std)])
-        cifar10_data = CIFAR10(root=self.hparams.data_dir, train=False, download=True, transform=None)
-        transform_data = torch.stack([transform(img) for img, label in cifar10_data])
+        if self.cifar10_data_test is None: 
+            self.cifar10_data_test = CIFAR10(root=self.hparams.data_dir, train=False, download=True, transform=None)
+        transform_data = torch.stack([transform(img) for img, label in self.cifar10_data_test])
         labels = torch.Tensor([label for img, label in cifar10_data])
 
         return transform_data, labels

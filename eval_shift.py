@@ -55,8 +55,8 @@ def eval_on_dataset_shift(dict_args):
 	model_acc_list = []
 	output_list = []
 	if dict_args['split'] == "roll":
-
-		for roll in np.arange(0,30,2):
+		
+		for roll in np.arange(0,34,2):
 			print(f"Processing roll {roll}...")
 			data, labels = data_module.get_roll_data(int(roll))
 
@@ -96,8 +96,9 @@ def eval_on_dataset_shift(dict_args):
 		with torch.no_grad():
 			base_model(data)
 		model_outputs = pre_activations[rbf_name] if dict_args['pre_activation'] else activations[rbf_name]
-		os.makedirs(f"{model_dir}/{pre}")
+		os.makedirs(f"{model_dir}/{pre}", exist_ok=True)
 		np.save(f"{model_dir}/{pre}/{pre}_{shift}_layer_{dict_args['layer']}_{act}_ouputs.npy", model_outputs)
+		return
 
 	with open(f"{model_dir}/{model_name}/{pre}_{shift}_acc.pkl", 'wb') as pickle_file:
 		pickle.dump(model_acc_list, pickle_file)
