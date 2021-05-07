@@ -66,7 +66,7 @@ def eval_on_dataset_shift(dict_args):
 			with torch.no_grad():
 				base_model(data)
 			model_outputs = pre_activations[rbf_name] if dict_args['pre_activation'] else activations[rbf_name]
-			output_list.append(dict(roll_pix=roll, output=model_outputs))
+			output_list.append(dict(shift=roll, output=model_outputs))
 
 	if dict_args['split'] == 'rot':
 
@@ -80,7 +80,7 @@ def eval_on_dataset_shift(dict_args):
 			with torch.no_grad():
 				base_model(data)
 			model_outputs = pre_activations[rbf_name] if dict_args['pre_activation'] else activations[rbf_name]
-			output_list.append(dict(roll_pix=roll, output=model_outputs))
+			output_list.append(dict(shift=roll, output=model_outputs))
 
 
 	# model_name.pth
@@ -90,7 +90,7 @@ def eval_on_dataset_shift(dict_args):
 	shift = dict_args['split']
 	act = 'pre_activation' if dict_args['pre_activation'] else 'post_activation'
 	os.makedirs(f"{model_dir}/{pre}", exist_ok=True)
-	
+
 	if dict_args['split'] == 'val':
 		print('Predicting on validation data...')
 		data, labels = data_module.get_validation_data()
