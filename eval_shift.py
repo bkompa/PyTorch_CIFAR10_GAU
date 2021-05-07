@@ -104,7 +104,7 @@ def eval_on_dataset_shift(dict_args):
 
 	with open(f"{model_dir}/{pre}/{pre}_{shift}_acc.pkl", 'wb') as pickle_file:
 		pickle.dump(model_acc_list, pickle_file)
-	with open(f"{model_dir}/{pre}/{pre}_{shift}_layer_{dict_args['layer']}_{act}_ouputs.pkl", 'wb') as pickle_file:
+	with open(f"{model_dir}/{pre}/{pre}_{shift}_{act}_ouputs.pkl", 'wb') as pickle_file:
 		pickle.dump(output_list, pickle_file)
 
 
