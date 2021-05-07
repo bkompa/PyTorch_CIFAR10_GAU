@@ -49,9 +49,9 @@ def eval_on_dataset_shift(dict_args):
 
 	print('Registering hooks...')
 	if dict_args['pre_activation']:
-		layer.register_forward_pre_hook(get_pre_activation(rbf_name))
+		base_model.register_forward_pre_hook(get_pre_activation(rbf_name))
 	else:
-		layer.register_forward_hook(get_activation(rbf_name))
+		base_model.register_forward_hook(get_activation(rbf_name))
 
 	model_acc_list = []
 	output_list = []
