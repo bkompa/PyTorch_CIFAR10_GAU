@@ -12,6 +12,11 @@ import os
 import torch
 import argparse
 
+corruptions = ['brightness', 'contrast', 'defocus_blur', 'elastic', 
+               'fog', 'frost', 'gaussian_blur', 'gaussian_noise',
+              'frosted_glass_blur', 'impulse_noise', 'pixelate', 'saturate', 'shot_noise', 
+              'spatter', 'speckle_noise', 'zoom_blur', ]
+
 def model_accuracy(model, data, labels):
 	with torch.no_grad():
 		output = model(data)
@@ -83,6 +88,22 @@ def eval_on_dataset_shift(dict_args):
 			model_outputs = pre_activations[rbf_name] if dict_args['pre_activation'] else activations[rbf_name]
 			output_list.append(dict(shift=roll, output=model_outputs))
 
+	if dict_args['split'] == 'cifar10_c':
+		for corruption in corruptions: 
+			for i in range(1, 6):
+				print(f"Processing {corruption}_{i}...")
+				data = np.load(f"{dict_args['data_dir']}/{corruption}_{i}.npy")
+				labels = np.load(f"{dict_args['data_dir']}/{corruption}_{i}_labels.npy")
+				data = torch.from_numpy(data)
+				labels = torch.from_numpy(labels)
+
+				shift_acc = model_accuracy(base_model, data, labels)
+				with torch.no_grad():
+					base_model(data)
+				model_outputs = pre_activations[rbf_name] if dict_args['pre_activation'] else activations[rbf_name]
+				output_list.append(dict(shift=corruption, output=model_outputs, level=i))
+
+
 
 	# model_name.pth
 	pre, ext = os.path.splitext(dict_args['model_name'])
@@ -110,25 +131,25 @@ def eval_on_dataset_shift(dict_args):
 
 
 def main(): 
-	parser = argparse.ArgumentParser("Eval model on shifted data")
+parser = argparse.ArgumentParser("Eval model on shifted data")
 
-	parser.add_argument("--data_dir", default="data/cifar10/")
-	parser.add_argument("--model_dir", default='/mnt/medqaresourcegroupdiag/medqa-fileshare/users/bk117/models')
-	parser.add_argument("--model_name", required=True)
-	parser.add_argument("--classifier", type=str, default="resnet18_RBF")
-	parser.add_argument("--split", type=str, choices=['roll', 'rot', 'cifar10_c', 'val'])
-	#parser.add_argument("--layer", type=int, default=4)
-	parser.add_argument("--pre_activation", action="store_true")
+parser.add_argument("--data_dir", default="data/cifar10/")
+parser.add_argument("--model_dir", default='/mnt/medqaresourcegroupdiag/medqa-fileshare/users/bk117/models')
+parser.add_argument("--model_name", required=True)
+parser.add_argument("--classifier", type=str, default="resnet18_RBF")
+parser.add_argument("--split", type=str, choices=['roll', 'rot', 'cifar10_c', 'val'])
+#parser.add_argument("--layer", type=int, default=4)
+parser.add_argument("--pre_activation", action="store_true")
 
-	parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
-	parser.add_argument("--batch_size", type=int, default=256)
-	parser.add_argument("--max_epochs", type=int, default=100)
-	parser.add_argument("--num_workers", type=int, default=8)
-	parser.add_argument("--val_split", type=int, default=4, choices=[0,1,2,3,4])
-	parser.add_argument("--gpu_id", type=str, default="0")
+parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
+parser.add_argument("--batch_size", type=int, default=256)
+parser.add_argument("--max_epochs", type=int, default=100)
+parser.add_argument("--num_workers", type=int, default=8)
+parser.add_argument("--val_split", type=int, default=4, choices=[0,1,2,3,4])
+parser.add_argument("--gpu_id", type=str, default="0")
 
-	parser.add_argument("--learning_rate", type=float, default=1e-2)
-	parser.add_argument("--weight_decay", type=float, default=1e-2)
+parser.add_argument("--learning_rate", type=float, default=1e-2)
+parser.add_argument("--weight_decay", type=float, default=1e-2)
 
 	args = parser.parse_args()
 	dict_args = vars(args) 
