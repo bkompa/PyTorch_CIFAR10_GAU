@@ -92,7 +92,7 @@ def eval_on_dataset_shift(dict_args):
 		for corruption in corruptions: 
 			for i in range(1, 6):
 				print(f"Processing {corruption}_{i}...")
-				data = np.load(f"{dict_args['data_dir']}/{corruption}_{i}.npy")
+				data = np.load(f"{dict_args['data_dir']}/{corruption}_{i}.npy").astype('d')
 				labels = np.load(f"{dict_args['data_dir']}/{corruption}_{i}_labels.npy")
 				data = torch.from_numpy(data)
 				labels = torch.from_numpy(labels)
