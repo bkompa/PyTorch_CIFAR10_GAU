@@ -41,7 +41,25 @@ def full_activation_to_dataframe(activations, shift):
 	return df
 
 split_dfs = [activation_to_dataframe(split_activations[i]['output'].numpy(), split_activations[i]['shift']) for i in range(len(split_activations))]
-full_split_dfs = [activation_to_dataframe(split_activations[i]['output'].numpy(), split_activations[i]['roll_pix']) for i in range(len(split_activations))]
+full_split_dfs = [full_activation_to_dataframe(split_activations[i]['output'].numpy(), split_activations[i]['shift']) for i in range(len(split_activations))]
 
 pd.concat(split_dfs).to_csv(f"{model_path}/{model_name}_{split}_{activation}_max_logit.csv", index_label='id')
 pd.concat(split_dfs).to_csv(f"{model_path}/{model_name}_{split}_{activation}_logsums.csv", index_label='id')
+pd.concat(full_split_dfs).to_csv(f"{model_path}/{model_name}_{split}_{activation}.csv", index_label='id')
+
+
+split = 'cifar10_c'
+split_activations = pickle.load(open(f"{model_path}/{model_name}_{split}_{activation}_activation_ouputs.pkl", "rb"))
+
+def cifar10_c_activation_to_dataframe(activations, shift, intensity):
+	mean_log_activations = np.log(activations)
+	max_mean_log_activations = np.max(mean_log_activations, axis=1)
+	df = pd.DataFrame(data=max_mean_log_activations, columns=["log_sum"])
+	df['shift'] = shift
+	df['level'] = intensity
+	return df
+
+split_dfs = [cifar10_c_activation_to_dataframe(split_activations[i]['output'].numpy(), split_activations[i]['shift'], split_activations[i]['level']) for i in range(len(split_activations))]
+pd.concat(split_dfs).to_csv(f"{model_path}/{model_name}_{split}_{activation}_max_logit.csv", index_label='id')
+
+

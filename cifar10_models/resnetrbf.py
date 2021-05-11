@@ -195,7 +195,7 @@ class ResNet_RBF(nn.Module):
         )
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
-        self.GAU = RBF_activation(num_classes)
+        self.GAU = RBF_activation(512)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -269,8 +269,8 @@ class ResNet_RBF(nn.Module):
 
         x = self.avgpool(x)
         x = x.reshape(x.size(0), -1)
-        x = self.fc(x)
         x = self.GAU(x)
+        x = self.fc(x)
 
         return x
 
