@@ -68,12 +68,16 @@ def main(args):
             trainer.fit(model, data)
             trainer.test()
 
+        torch.save(model.model.state_dict(), f"{args.model_dir}/{args.model_name}")
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()
 
     # PROGRAM level args
     parser.add_argument("--data_dir", type=str, default="data/cifar10/")
+    parser.add_argument("--model_dir", type=str, default="mnt/medqaresourcegroupdiag/medqa-fileshare/users/bk117/models/")
+    parser.add_argument("--model_name", type=str, required=True)
     parser.add_argument("--download_weights", type=int, default=0, choices=[0, 1])
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
