@@ -33,7 +33,8 @@ def eval_on_dataset_shift(dict_args):
 		base_model = torch.load(dict_args['model_path']).model
 	except:
 		base_model = CIFAR10Module(args)
-		base_model = base_model.model.load_state_dict(torch.load(dict_args['model_path']))
+		base_model.model.load_state_dict(torch.load(dict_args['model_path']))
+		base_model = base_model.model
 	base_model = base_model.cpu().eval()
 
 	data_module = CIFAR10Data(args)
@@ -135,31 +136,31 @@ def eval_on_dataset_shift(dict_args):
 
 
 def main(): 
-	parser = argparse.ArgumentParser("Eval model on shifted data")
+parser = argparse.ArgumentParser("Eval model on shifted data")
 
-	parser.add_argument("--data_dir", default="data/cifar10/")
-	parser.add_argument("--model_dir", default='/mnt/medqaresourcegroupdiag/medqa-fileshare/users/bk117/models')
-	parser.add_argument("--model_name", required=True)
-	parser.add_argument("--classifier", type=str, default="resnet18_RBF")
-	parser.add_argument("--split", type=str, choices=['roll', 'rot', 'cifar10_c', 'val'], required=True)
-	#parser.add_argument("--layer", type=int, default=4)
-	parser.add_argument("--pre_activation", action="store_true")
+parser.add_argument("--data_dir", default="data/cifar10/")
+parser.add_argument("--model_dir", default='/mnt/medqaresourcegroupdiag/medqa-fileshare/users/bk117/models')
+parser.add_argument("--model_name", required=True)
+parser.add_argument("--classifier", type=str, default="resnet18_RBF")
+parser.add_argument("--split", type=str, choices=['roll', 'rot', 'cifar10_c', 'val'], required=True)
+#parser.add_argument("--layer", type=int, default=4)
+parser.add_argument("--pre_activation", action="store_true")
 
-	parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
-	parser.add_argument("--batch_size", type=int, default=256)
-	parser.add_argument("--max_epochs", type=int, default=100)
-	parser.add_argument("--num_workers", type=int, default=8)
-	parser.add_argument("--val_split", type=int, default=4, choices=[0,1,2,3,4])
-	parser.add_argument("--gpu_id", type=str, default="0")
+parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
+parser.add_argument("--batch_size", type=int, default=256)
+parser.add_argument("--max_epochs", type=int, default=100)
+parser.add_argument("--num_workers", type=int, default=8)
+parser.add_argument("--val_split", type=int, default=4, choices=[0,1,2,3,4])
+parser.add_argument("--gpu_id", type=str, default="0")
 
-	parser.add_argument("--learning_rate", type=float, default=1e-2)
-	parser.add_argument("--weight_decay", type=float, default=1e-2)
+parser.add_argument("--learning_rate", type=float, default=1e-2)
+parser.add_argument("--weight_decay", type=float, default=1e-2)
 
-	args = parser.parse_args()
-	dict_args = vars(args) 
-	dict_args['model_path'] = os.path.join(dict_args['model_dir'], dict_args['model_name'])
+args = parser.parse_args(['--model_name', 'cifar10_pool_gau_val_4.pth', '--split', 'val'])
+dict_args = vars(args) 
+dict_args['model_path'] = os.path.join(dict_args['model_dir'], dict_args['model_name'])
 
-	eval_on_dataset_shift(dict_args)
+eval_on_dataset_shift(dict_args)
 
 if __name__ == "__main__":
 	main()
