@@ -29,7 +29,11 @@ def eval_on_dataset_shift(dict_args):
 	# load model state_dic
 	args = Namespace(**dict_args)
 	print('Loading model...')
-	base_model = torch.load(dict_args['model_path']).model
+	try:
+		base_model = torch.load(dict_args['model_path']).model
+	except:
+		base_model = CIFAR10Module(args)
+		base_model = base_model.model.load_state_dict(torch.load(dict_args['model_path']))
 	base_model = base_model.cpu().eval()
 
 	data_module = CIFAR10Data(args)
@@ -137,7 +141,7 @@ def main():
 	parser.add_argument("--model_dir", default='/mnt/medqaresourcegroupdiag/medqa-fileshare/users/bk117/models')
 	parser.add_argument("--model_name", required=True)
 	parser.add_argument("--classifier", type=str, default="resnet18_RBF")
-	parser.add_argument("--split", type=str, choices=['roll', 'rot', 'cifar10_c', 'val'])
+	parser.add_argument("--split", type=str, choices=['roll', 'rot', 'cifar10_c', 'val'], required=True)
 	#parser.add_argument("--layer", type=int, default=4)
 	parser.add_argument("--pre_activation", action="store_true")
 
