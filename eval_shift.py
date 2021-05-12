@@ -97,7 +97,7 @@ def eval_on_dataset_shift(dict_args):
 		for corruption in corruptions: 
 			for i in range(1, 6):
 				print(f"Processing {corruption}_{i}...")
-				data = np.load(f"{dict_args['data_dir']}/{corruption}_{i}.npy").astype('d')
+				data = np.load(f"{dict_args['data_dir']}/{corruption}_{i}.npy").astype('f')
 				labels = np.load(f"{dict_args['data_dir']}/{corruption}_{i}_labels.npy")
 				data = torch.from_numpy(data)
 				labels = torch.from_numpy(labels)
@@ -138,7 +138,7 @@ def eval_on_dataset_shift(dict_args):
 def main(): 
 	parser = argparse.ArgumentParser("Eval model on shifted data")
 
-	parser.add_argument("--data_dir", default="data/cifar10/")
+	parser.add_argument("--data_dir", default="data/cifar10")
 	parser.add_argument("--model_dir", default='/mnt/medqaresourcegroupdiag/medqa-fileshare/users/bk117/models')
 	parser.add_argument("--model_name", required=True)
 	parser.add_argument("--classifier", type=str, default="resnet18_RBF")
